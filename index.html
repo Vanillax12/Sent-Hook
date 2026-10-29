@@ -3,637 +3,189 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090817">
 <title>Sent!Hook</title>
 <style>
-:root {
-  --glass: rgba(20, 18, 43, .76);
-  --line: rgba(255,255,255,.14);
-  --muted: #b9b3d2;
-  --text: #f8f6ff;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  min-height: 100vh;
-  padding: 22px;
-  display: grid;
-  place-items: center;
-  background: #090817;
-  color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-.aurora {
-  position: fixed;
-  inset: -35%;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 25% 25%, #713bd5aa, transparent 35%),
-    radial-gradient(ellipse at 80% 25%, #00a8c899, transparent 34%),
-    radial-gradient(ellipse at 55% 80%, #c42c92aa, transparent 36%),
-    radial-gradient(ellipse at 15% 75%, #3159d799, transparent 35%);
-  filter: blur(45px);
-  animation: aurora 18s ease-in-out infinite alternate;
-}
-@keyframes aurora {
-  from { transform: rotate(0) scale(1); }
-  to { transform: rotate(12deg) scale(1.12); }
-}
-.app {
-  width: min(100%, 660px);
-  padding: 2px;
-  border-radius: 25px;
-  background: linear-gradient(120deg,
-    #ff4fd8, #8b5cf6, #26d9ff, #5dffb0, #ff4fd8);
-  background-size: 300% 300%;
-  animation: borderflow 8s linear infinite;
-  box-shadow: 0 0 55px #8b5cf633;
-}
-@keyframes borderflow {
-  to { background-position: 300% 50%; }
-}
-.panel {
-  padding: clamp(20px, 5vw, 35px);
-  border-radius: 23px;
-  background: var(--glass);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-}
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 27px;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.logo {
-  width: 46px;
-  height: 46px;
-  display: grid;
-  place-items: center;
-  border-radius: 15px;
-  font-size: 24px;
-  background: linear-gradient(135deg, #a855f7, #ec4899);
-  box-shadow: 0 0 24px #a855f755;
-}
-h1 {
-  margin: 0;
-  font-size: 26px;
-  letter-spacing: -.8px;
-}
-.subtitle {
-  margin: 3px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-select, input, textarea, button { font: inherit; }
-select {
-  max-width: 125px;
-  padding: 9px;
-  color: white;
-  background: #211c3b;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-label {
-  display: block;
-  margin: 18px 0 8px;
-  font-size: 13px;
-  font-weight: 650;
-  color: #e7e2ff;
-}
-input, textarea {
-  display: block;
-  width: 100%;
-  padding: 13px 14px;
-  color: white;
-  background: #0d0b1e99;
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  outline: none;
-  transition: border-color .2s, box-shadow .2s;
-}
-input:focus, textarea:focus {
-  border-color: #b78cff;
-  box-shadow: 0 0 0 3px #a855f722;
-}
-textarea {
-  min-height: 145px;
-  resize: vertical;
-  line-height: 1.5;
-}
-.composer { position: relative; }
-.composer textarea { padding-bottom: 59px; }
-.composer-tools {
-  position: absolute;
-  bottom: 9px;
-  left: 9px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.icon-button {
-  width: 35px;
-  height: 35px;
-  display: inline-grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  color: white;
-  background: #ffffff0b;
-  cursor: pointer;
-}
-.icon-button:hover { background: #ffffff20; }
-.counter {
-  margin-left: 4px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.send {
-  width: 100%;
-  margin-top: 22px;
-  padding: 15px 20px;
-  border: 0;
-  border-radius: 13px;
-  color: white;
-  font-weight: 750;
-  letter-spacing: .3px;
-  cursor: pointer;
-  background: linear-gradient(90deg, #7c3aed, #db2777, #2563eb);
-  background-size: 200% 100%;
-  box-shadow: 0 0 24px #a855f744;
-  transition: transform .2s, box-shadow .2s;
-  animation: buttonflow 5s linear infinite;
-}
-@keyframes buttonflow {
-  to { background-position: 200% 0; }
-}
-.send:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 34px #c084fc77;
-}
-.send:disabled { opacity: .6; cursor: wait; transform: none; }
-.menu-wrap { position: relative; }
-.menu {
-  position: absolute;
-  bottom: 43px;
-  left: 0;
-  z-index: 5;
-  display: none;
-  width: 190px;
-  padding: 6px;
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  background: #17132b;
-  box-shadow: 0 15px 40px #0008;
-}
-.menu.open { display: block; }
-.menu button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  border: 0;
-  border-radius: 8px;
-  color: white;
-  text-align: left;
-  background: transparent;
-  cursor: pointer;
-}
-.menu button:hover { background: #ffffff12; }
-.extra {
-  display: none;
-  margin-top: 16px;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  background: #08071966;
-}
-.extra.open { display: block; }
-.extra label { margin-top: 10px; }
-.extra label:first-child { margin-top: 0; }
-.extra input, .extra textarea { margin-top: 6px; }
-.file-label {
-  display: inline-flex;
-  margin-top: 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  cursor: pointer;
-}
-.file-label input { display: none; }
-.hint {
-  margin: 10px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-.preview {
-  margin-top: 12px;
-  padding: 12px;
-  border-radius: 10px;
-  background: #ffffff08;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-.status {
-  min-height: 22px;
-  margin-top: 13px;
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
-  overflow-wrap: anywhere;
-}
-.status.error { color: #ff9aab; }
-.status.success { color: #7df5c0; }
-footer {
-  margin-top: 20px;
-  color: #a9a2c5;
-  font-size: 11px;
-  text-align: center;
-}
-@media (max-width: 430px) {
-  body { padding: 12px; }
-  header { align-items: flex-start; }
-  h1 { font-size: 23px; }
-  select { max-width: 105px; font-size: 12px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    transition-duration: .01ms !important;
-  }
-}
+*{box-sizing:border-box}
+:root{--muted:#b9b3d2;--line:#ffffff24}
+body{margin:0;min-height:100vh;padding:18px;display:grid;place-items:center;background:#090817;color:#f8f6ff;font-family:system-ui,sans-serif}
+.aurora{position:fixed;inset:-35%;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 25% 25%,#713bd5aa,transparent 35%),radial-gradient(ellipse at 80% 25%,#00a8c899,transparent 34%),radial-gradient(ellipse at 55% 80%,#c42c92aa,transparent 36%),radial-gradient(ellipse at 15% 75%,#3159d799,transparent 35%);filter:blur(45px);animation:aurora 18s ease-in-out infinite alternate}
+@keyframes aurora{to{transform:rotate(12deg) scale(1.12)}}
+.app{width:min(100%,660px);padding:2px;border-radius:25px;background:linear-gradient(120deg,#ff4fd8,#8b5cf6,#26d9ff,#5dffb0,#ff4fd8);background-size:300% 300%;animation:borderflow 8s linear infinite;box-shadow:0 0 55px #8b5cf633}
+@keyframes borderflow{to{background-position:300% 50%}}
+.panel{padding:clamp(20px,5vw,35px);border-radius:23px;background:rgba(20,18,43,.82);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px)}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:27px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;font-size:24px;background:linear-gradient(135deg,#a855f7,#ec4899);box-shadow:0 0 24px #a855f755}
+h1{margin:0;font-size:26px;letter-spacing:-.8px}
+.subtitle{margin:3px 0 0;color:var(--muted);font-size:13px}
+select,input,textarea,button{font:inherit}
+select{max-width:125px;padding:9px;color:white;background:#211c3b;border:1px solid var(--line);border-radius:10px}
+label{display:block;margin:18px 0 8px;font-size:13px;font-weight:650;color:#e7e2ff}
+input,textarea{display:block;width:100%;padding:13px 14px;color:white;background:#0d0b1e99;border:1px solid var(--line);border-radius:13px;outline:none}
+input:focus,textarea:focus{border-color:#b78cff;box-shadow:0 0 0 3px #a855f722}
+textarea{min-height:145px;resize:vertical;line-height:1.5}
+.composer{position:relative}
+.composer textarea{padding-bottom:59px}
+.composer-tools{position:absolute;bottom:9px;left:9px;display:flex;align-items:center;gap:8px}
+.icon-button{min-width:35px;height:35px;display:inline-grid;place-items:center;padding:4px 8px;border:1px solid var(--line);border-radius:10px;color:white;background:#ffffff0b;cursor:pointer}
+.icon-button:hover{background:#ffffff20}
+.counter{margin-left:4px;color:var(--muted);font-size:12px}
+.send{width:100%;margin-top:22px;padding:15px 20px;border:0;border-radius:13px;color:white;font-weight:750;cursor:pointer;background:linear-gradient(90deg,#7c3aed,#db2777,#2563eb);background-size:200% 100%;box-shadow:0 0 24px #a855f744;animation:buttonflow 5s linear infinite;transition:transform .2s,box-shadow .2s}
+@keyframes buttonflow{to{background-position:200% 0}}
+.send:hover{transform:translateY(-2px);box-shadow:0 0 34px #c084fc77}
+.send:disabled{opacity:.6;cursor:wait;transform:none}
+.menu-wrap{position:relative}
+.menu{position:absolute;bottom:43px;left:0;z-index:5;display:none;width:190px;padding:6px;border:1px solid var(--line);border-radius:13px;background:#17132b;box-shadow:0 15px 40px #0008}
+.menu.open{display:block}
+.menu button{display:block;width:100%;padding:10px;border:0;border-radius:8px;color:white;text-align:left;background:transparent;cursor:pointer}
+.menu button:hover{background:#ffffff12}
+.extra{display:none;margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:13px;background:#08071966}
+.extra.open{display:block}
+.extra label{margin-top:10px}
+.extra label:first-child{margin-top:0}
+.extra input,.extra textarea{margin-top:6px}
+.file-label{display:inline-flex;margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.file-label input{display:none}
+.hint{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.preview{margin-top:12px;padding:12px;border-radius:10px;background:#ffffff08;overflow-wrap:anywhere;white-space:pre-wrap}
+.status{min-height:22px;margin-top:13px;color:var(--muted);font-size:13px;text-align:center;overflow-wrap:anywhere}
+.status.error{color:#ff9aab}.status.success{color:#7df5c0}
+footer{margin-top:20px;color:#a9a2c5;font-size:11px;text-align:center}
+@media(max-width:430px){body{padding:10px}header{align-items:flex-start}h1{font-size:23px}select{max-width:105px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 <div class="aurora"></div>
-
-<main class="app">
-<section class="panel">
+<main class="app"><section class="panel">
 <header>
-  <div class="brand">
-    <div class="logo" aria-hidden="true">✉</div>
-    <div>
-      <h1>Sent!Hook</h1>
-      <p class="subtitle" data-i18n="subtitle">a little message, sent.</p>
-    </div>
-  </div>
-  <select id="language" aria-label="Language">
-    <option value="en">English</option>
-    <option value="es">Español</option>
-    <option value="pt">Português</option>
-    <option value="fr">Français</option>
-    <option value="ja">日本語</option>
-  </select>
+<div class="brand"><div class="logo">✉</div><div><h1>Sent!Hook</h1><p class="subtitle" data-i="subtitle">a little message, sent.</p></div></div>
+<select id="language" aria-label="Language">
+<option value="en">English</option><option value="es">Español</option><option value="pt">Português</option><option value="fr">Français</option><option value="ja">日本語</option>
+</select>
 </header>
 
 <form id="messageForm">
-  <label for="username" data-i18n="usernameLabel">Username</label>
-  <input id="username" maxlength="80" autocomplete="off"
-    placeholder="Your display name">
+<label for="username" data-i="username">Username</label>
+<input id="username" maxlength="80" placeholder="Your display name" autocomplete="off">
 
-  <label for="message" data-i18n="messageLabel">Message</label>
-  <div class="composer">
-    <textarea id="message" maxlength="2000"
-      placeholder="write something..." required></textarea>
-    <div class="composer-tools">
-      <div class="menu-wrap">
-        <button class="icon-button" id="plusButton" type="button"
-          aria-label="More options" aria-expanded="false">＋</button>
-        <div class="menu" id="plusMenu">
-          <button type="button" data-action="embed">▣ Embed</button>
-          <button type="button" data-action="media">▧ Media</button>
-          <button type="button" data-action="markdown">✎ Markdown</button>
-          <button type="button" data-action="emoji">☺ Emoji</button>
-        </div>
-      </div>
-      <span class="counter" id="counter">0 / 2000</span>
-    </div>
-  </div>
+<label for="message" data-i="message">Message</label>
+<div class="composer">
+<textarea id="message" maxlength="2000" placeholder="write something..." required></textarea>
+<div class="composer-tools">
+<div class="menu-wrap">
+<button class="icon-button" id="plusButton" type="button" aria-label="More options" aria-expanded="false">＋</button>
+<div class="menu" id="plusMenu">
+<button type="button" data-action="embed" data-i="embed">▣ Embed</button>
+<button type="button" data-action="media" data-i="media">▧ Media</button>
+<button type="button" data-action="markdown" data-i="markdown">✎ Markdown</button>
+<button type="button" data-action="emoji" data-i="emoji">☺ Emoji</button>
+</div>
+</div>
+<span class="counter" id="counter">0 / 2000</span>
+</div>
+</div>
 
-  <section class="extra" id="embedPanel">
-    <label for="embedTitle" data-i18n="embedTitle">Embed title</label>
-    <input id="embedTitle" maxlength="256" placeholder="A cool title">
-    <label for="embedDescription" data-i18n="embedDescription">Embed description</label>
-    <textarea id="embedDescription" maxlength="4000"
-      placeholder="Write your embed..." style="min-height:75px"></textarea>
-    <label for="embedColor" data-i18n="embedColor">Embed color</label>
-    <input id="embedColor" type="color" value="#a855f7">
-  </section>
-
-  <section class="extra" id="mediaPanel">
-    <label data-i18n="mediaLabel">Attach media</label>
-    <label class="file-label">
-      <span data-i18n="chooseFiles">＋ Choose files</span>
-      <input id="files" type="file" accept="image/*,video/*,audio/*,.pdf,.txt" multiple>
-    </label>
-    <p class="hint" data-i18n="mediaHint">Choose files to attach to your message.</p>
-    <div id="fileList" class="hint"></div>
-  </section>
-
-  <section class="extra" id="markdownPanel">
-    <div style="display:flex;flex-wrap:wrap;gap:7px">
-      <button type="button" class="icon-button" data-md="**|**"><b>B</b></button>
-      <button type="button" class="icon-button" data-md="*|*"><i>I</i></button>
-      <button type="button" class="icon-button" data-md="~~|~~"><s>S</s></button>
-      <button type="button" class="icon-button" data-md="`|`">`</button>
-      <button type="button" class="icon-button" data-md="||">spoiler</button>
-      <button type="button" class="icon-button" data-md="> ">quote</button>
-    </div>
-    <p class="hint" data-i18n="markdownHint">Select text, then tap a formatting button.</p>
-    <div class="preview" id="markdownPreview"></div>
-  </section>
-
-  <section class="extra" id="emojiPanel">
-    <div id="emojiChoices" style="display:flex;flex-wrap:wrap;gap:7px">
-      <button type="button" class="icon-button">😀</button>
-      <button type="button" class="icon-button">😂</button>
-      <button type="button" class="icon-button">😭</button>
-      <button type="button" class="icon-button">🔥</button>
-      <button type="button" class="icon-button">✨</button>
-      <button type="button" class="icon-button">💜</button>
-      <button type="button" class="icon-button">👍</button>
-      <button type="button" class="icon-button">👀</button>
-      <button type="button" class="icon-button">🎉</button>
-      <button type="button" class="icon-button">🤖</button>
-    </div>
-  </section>
-
-  <button class="send" id="sendButton" type="submit">
-    <span data-i18n="send">✦ Send message</span>
-  </button>
-  <div class="status" id="status" role="status" aria-live="polite"></div>
-</form>
-<footer data-i18n="footer">a little corner for your words.</footer>
+<section class="extra" id="embedPanel">
+<label for="embedTitle" data-i="embedTitle">Embed title</label>
+<input id="embedTitle" maxlength="256" placeholder="A cool title">
+<label for="embedDescription" data-i="embedDescription">Embed description</label>
+<textarea id="embedDescription" maxlength="4000" placeholder="Write your embed..." style="min-height:75px"></textarea>
+<label for="embedColor" data-i="embedColor">Embed color</label>
+<input id="embedColor" type="color" value="#a855f7">
 </section>
-</main>
+
+<section class="extra" id="mediaPanel">
+<label data-i="mediaLabel">Attach media</label>
+<label class="file-label"><span data-i="choose">＋ Choose files</span><input id="files" type="file" accept="image/*,video/*,audio/*,.pdf,.txt" multiple></label>
+<p class="hint" data-i="mediaHint">Choose files to attach to your message.</p>
+<div id="fileList" class="hint"></div>
+</section>
+
+<section class="extra" id="markdownPanel">
+<div style="display:flex;flex-wrap:wrap;gap:7px">
+<button type="button" class="icon-button" data-md="**|**"><b>B</b></button>
+<button type="button" class="icon-button" data-md="*|*"><i>I</i></button>
+<button type="button" class="icon-button" data-md="~~|~~"><s>S</s></button>
+<button type="button" class="icon-button" data-md="`|`">`</button>
+<button type="button" class="icon-button" data-md="||">spoiler</button>
+<button type="button" class="icon-button" data-md="> ">quote</button>
+</div>
+<p class="hint" data-i="markdownHint">Select text, then tap a formatting button.</p>
+<div class="preview" id="markdownPreview"></div>
+</section>
+
+<section class="extra" id="emojiPanel">
+<div id="emojiChoices" style="display:flex;flex-wrap:wrap;gap:7px">
+<button type="button" class="icon-button">😀</button><button type="button" class="icon-button">😂</button><button type="button" class="icon-button">😭</button><button type="button" class="icon-button">🔥</button><button type="button" class="icon-button">✨</button><button type="button" class="icon-button">💜</button><button type="button" class="icon-button">👍</button><button type="button" class="icon-button">👀</button><button type="button" class="icon-button">🎉</button><button type="button" class="icon-button">🤖</button>
+</div>
+</section>
+
+<button class="send" id="sendButton" type="submit"><span data-i="send">✦ Send message</span></button>
+<div class="status" id="status" role="status" aria-live="polite"></div>
+</form>
+<footer data-i="footer">a little corner for your words.</footer>
+</section></main>
 
 <script>
 /*
-  Demo endpoint: example placeholder only.
-  Do not publish a real webhook URL in a public HTML file.
-  Replace this with your own backend endpoint when you deploy.
+  Replace this URL with your own webhook URL when ready.
+  NOTE: a real webhook URL placed in a public website can be copied
+  by visitors. For a public release, store it in a backend secret.
 */
-const API_ENDPOINT = "";
-const DEMO_WEBHOOK_URL =
-  "https://discord.com/api/webhooks/1565451066789863495/fZEe6K-F3EYtY5dWvQFOnKpqNQtpb44-3H-70aEVhZCoac021ovlqjlCge2r6qaJJM8w";
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1565451066789863495/fZEe6K-F3EYtY5dWvQFOnKpqNQtpb44-3H-70aEVhZCoac021ovlqjlCge2r6qaJJM8w";
 
-const translations = {
-  en: {
-    subtitle:"a little message, sent.", usernameLabel:"Username",
-    messageLabel:"Message", send:"✦ Send message",
-    embedTitle:"Embed title", embedDescription:"Embed description",
-    embedColor:"Embed color", mediaLabel:"Attach media",
-    chooseFiles:"＋ Choose files",
-    mediaHint:"Choose files to attach to your message.",
-    markdownHint:"Select text, then tap a formatting button.",
-    footer:"a little corner for your words.",
-    placeholder:"write something...", usernamePlaceholder:"Your display name",
-    sending:"Sending...", empty:"Write a message or add an embed first.",
-    success:"Message sent!", failure:"Couldn't send your message. Please try again.",
-    files:"Selected files", embed:"▣ Embed", media:"▧ Media",
-    markdown:"✎ Markdown", emoji:"☺ Emoji",
-    demo:"This demo has no active sending endpoint yet."
-  },
-  es: {
-    subtitle:"un pequeño mensaje, enviado.", usernameLabel:"Nombre",
-    messageLabel:"Mensaje", send:"✦ Enviar mensaje",
-    embedTitle:"Título del embed", embedDescription:"Descripción del embed",
-    embedColor:"Color del embed", mediaLabel:"Adjuntar archivos",
-    chooseFiles:"＋ Elegir archivos",
-    mediaHint:"Elige archivos para adjuntarlos al mensaje.",
-    markdownHint:"Selecciona texto y pulsa un botón de formato.",
-    footer:"un pequeño rincón para tus palabras.",
-    placeholder:"escribe algo...", usernamePlaceholder:"Tu nombre",
-    sending:"Enviando...", empty:"Escribe un mensaje o añade un embed.",
-    success:"¡Mensaje enviado!", failure:"No se pudo enviar. Inténtalo de nuevo.",
-    files:"Archivos seleccionados", embed:"▣ Embed", media:"▧ Archivos",
-    markdown:"✎ Markdown", emoji:"☺ Emoji",
-    demo:"Esta demo todavía no tiene un destino de envío activo."
-  },
-  pt: {
-    subtitle:"uma pequena mensagem, enviada.", usernameLabel:"Nome",
-    messageLabel:"Mensagem", send:"✦ Enviar mensagem",
-    embedTitle:"Título do embed", embedDescription:"Descrição do embed",
-    embedColor:"Cor do embed", mediaLabel:"Anexar arquivos",
-    chooseFiles:"＋ Escolher arquivos",
-    mediaHint:"Escolha arquivos para anexar à mensagem.",
-    markdownHint:"Selecione o texto e toque em um botão de formatação.",
-    footer:"um pequeno espaço para suas palavras.",
-    placeholder:"escreva algo...", usernamePlaceholder:"Seu nome",
-    sending:"Enviando...", empty:"Escreva uma mensagem ou adicione um embed.",
-    success:"Mensagem enviada!", failure:"Não foi possível enviar. Tente novamente.",
-    files:"Arquivos selecionados", embed:"▣ Embed", media:"▧ Arquivos",
-    markdown:"✎ Markdown", emoji:"☺ Emoji",
-    demo:"Esta demonstração ainda não tem um destino de envio ativo."
-  },
-  fr: {
-    subtitle:"un petit message, envoyé.", usernameLabel:"Nom",
-    messageLabel:"Message", send:"✦ Envoyer",
-    embedTitle:"Titre de l'embed", embedDescription:"Description de l'embed",
-    embedColor:"Couleur de l'embed", mediaLabel:"Joindre des fichiers",
-    chooseFiles:"＋ Choisir des fichiers",
-    mediaHint:"Choisissez les fichiers à joindre au message.",
-    markdownHint:"Sélectionnez le texte, puis choisissez un format.",
-    footer:"un petit espace pour vos mots.",
-    placeholder:"écrivez quelque chose...", usernamePlaceholder:"Votre nom",
-    sending:"Envoi...", empty:"Écrivez un message ou ajoutez un embed.",
-    success:"Message envoyé !", failure:"Échec de l'envoi. Réessayez.",
-    files:"Fichiers sélectionnés", embed:"▣ Embed", media:"▧ Fichiers",
-    markdown:"✎ Markdown", emoji:"☺ Emoji",
-    demo:"Cette démo n'a pas encore de destination d'envoi active."
-  },
-  ja: {
-    subtitle:"小さなメッセージを届けよう。", usernameLabel:"ユーザー名",
-    messageLabel:"メッセージ", send:"✦ メッセージを送信",
-    embedTitle:"埋め込みタイトル", embedDescription:"埋め込み説明",
-    embedColor:"埋め込みの色", mediaLabel:"ファイルを添付",
-    chooseFiles:"＋ ファイルを選択",
-    mediaHint:"メッセージに添付するファイルを選んでください。",
-    markdownHint:"テキストを選択してから書式ボタンを押してください。",
-    footer:"あなたの言葉のための小さな場所。",
-    placeholder:"メッセージを入力...", usernamePlaceholder:"表示名",
-    sending:"送信中...", empty:"メッセージか埋め込みを入力してください。",
-    success:"送信しました！", failure:"送信できませんでした。もう一度お試しください。",
-    files:"選択したファイル", embed:"▣ 埋め込み", media:"▧ ファイル",
-    markdown:"✎ Markdown", emoji:"☺ 絵文字",
-    demo:"このデモにはまだ送信先が設定されていません。"
-  }
+const words={
+en:{subtitle:"a little message, sent.",username:"Username",message:"Message",send:"✦ Send message",embedTitle:"Embed title",embedDescription:"Embed description",embedColor:"Embed color",mediaLabel:"Attach media",choose:"＋ Choose files",mediaHint:"Choose files to attach to your message.",markdownHint:"Select text, then tap a formatting button.",footer:"a little corner for your words.",placeholder:"write something...",userPlaceholder:"Your display name",sending:"Sending...",empty:"Write a message or add an embed first.",success:"Message sent!",failure:"Couldn't send your message. Please try again.",files:"Selected files",embed:"▣ Embed",media:"▧ Media",markdown:"✎ Markdown",emoji:"☺ Emoji"},
+es:{subtitle:"un pequeño mensaje, enviado.",username:"Nombre",message:"Mensaje",send:"✦ Enviar mensaje",embedTitle:"Título del embed",embedDescription:"Descripción del embed",embedColor:"Color del embed",mediaLabel:"Adjuntar archivos",choose:"＋ Elegir archivos",mediaHint:"Elige archivos para adjuntarlos al mensaje.",markdownHint:"Selecciona texto y pulsa un botón de formato.",footer:"un pequeño rincón para tus palabras.",placeholder:"escribe algo...",userPlaceholder:"Tu nombre",sending:"Enviando...",empty:"Escribe un mensaje o añade un embed.",success:"¡Mensaje enviado!",failure:"No se pudo enviar. Inténtalo de nuevo.",files:"Archivos seleccionados",embed:"▣ Embed",media:"▧ Archivos",markdown:"✎ Markdown",emoji:"☺ Emoji"},
+pt:{subtitle:"uma pequena mensagem, enviada.",username:"Nome",message:"Mensagem",send:"✦ Enviar mensagem",embedTitle:"Título do embed",embedDescription:"Descrição do embed",embedColor:"Cor do embed",mediaLabel:"Anexar arquivos",choose:"＋ Escolher arquivos",mediaHint:"Escolha arquivos para anexar à mensagem.",markdownHint:"Selecione o texto e toque em um botão de formatação.",footer:"um pequeno espaço para suas palavras.",placeholder:"escreva algo...",userPlaceholder:"Seu nome",sending:"Enviando...",empty:"Escreva uma mensagem ou adicione um embed.",success:"Mensagem enviada!",failure:"Não foi possível enviar. Tente novamente.",files:"Arquivos selecionados",embed:"▣ Embed",media:"▧ Arquivos",markdown:"✎ Markdown",emoji:"☺ Emoji"},
+fr:{subtitle:"un petit message, envoyé.",username:"Nom",message:"Message",send:"✦ Envoyer",embedTitle:"Titre de l'embed",embedDescription:"Description de l'embed",embedColor:"Couleur de l'embed",mediaLabel:"Joindre des fichiers",choose:"＋ Choisir des fichiers",mediaHint:"Choisissez les fichiers à joindre au message.",markdownHint:"Sélectionnez le texte, puis choisissez un format.",footer:"un petit espace pour vos mots.",placeholder:"écrivez quelque chose...",userPlaceholder:"Votre nom",sending:"Envoi...",empty:"Écrivez un message ou ajoutez un embed.",success:"Message envoyé !",failure:"Échec de l'envoi. Réessayez.",files:"Fichiers sélectionnés",embed:"▣ Embed",media:"▧ Fichiers",markdown:"✎ Markdown",emoji:"☺ Emoji"},
+ja:{subtitle:"小さなメッセージを届けよう。",username:"ユーザー名",message:"メッセージ",send:"✦ メッセージを送信",embedTitle:"埋め込みタイトル",embedDescription:"埋め込み説明",embedColor:"埋め込みの色",mediaLabel:"ファイルを添付",choose:"＋ ファイルを選択",mediaHint:"メッセージに添付するファイルを選んでください。",markdownHint:"テキストを選択してから書式ボタンを押してください。",footer:"あなたの言葉のための小さな場所。",placeholder:"メッセージを入力...",userPlaceholder:"表示名",sending:"送信中...",empty:"メッセージか埋め込みを入力してください。",success:"送信しました！",failure:"送信できませんでした。もう一度お試しください。",files:"選択したファイル",embed:"▣ 埋め込み",media:"▧ ファイル",markdown:"✎ Markdown",emoji:"☺ 絵文字"}
 };
-
-const $ = id => document.getElementById(id);
-const message = $("message");
-const status = $("status");
-const menu = $("plusMenu");
-const plusButton = $("plusButton");
-let lang = "en";
-
-function t(key) {
-  return translations[lang][key] || translations.en[key] || key;
+const $=id=>document.getElementById(id);
+const msg=$("message");
+let lang="en";
+function t(k){return words[lang][k]||words.en[k]||k}
+function status(text,type=""){$("status").textContent=text;$("status").className="status "+type}
+function update(){ $("counter").textContent=`${msg.value.length} / 2000`; $("markdownPreview").textContent=msg.value}
+function insert(text){const a=msg.selectionStart,b=msg.selectionEnd;msg.setRangeText(text,a,b,"end");msg.focus();update()}
+function wrap(before,after){const a=msg.selectionStart,b=msg.selectionEnd,s=msg.value.slice(a,b);msg.setRangeText(before+s+after,a,b,"select");msg.focus();msg.setSelectionRange(a+before.length,a+before.length+s.length);update()}
+function panel(name){["embed","media","markdown","emoji"].forEach(k=>$(k+"Panel").classList.toggle("open",k===name));$("plusMenu").classList.remove("open");$("plusButton").setAttribute("aria-expanded","false")}
+function translate(){
+document.documentElement.lang=lang;
+document.querySelectorAll("[data-i]").forEach(el=>el.textContent=t(el.dataset.i));
+msg.placeholder=t("placeholder");$("username").placeholder=t("userPlaceholder");
 }
-function setStatus(text, type = "") {
-  status.textContent = text;
-  status.className = "status " + type;
-}
-function updateCounter() {
-  $("counter").textContent = `${message.value.length} / 2000`;
-  $("markdownPreview").textContent = message.value;
-}
-function insertAtCursor(text) {
-  const start = message.selectionStart;
-  const end = message.selectionEnd;
-  message.setRangeText(text, start, end, "end");
-  message.focus();
-  updateCounter();
-}
-function wrapSelection(before, after) {
-  const start = message.selectionStart;
-  const end = message.selectionEnd;
-  const selected = message.value.slice(start, end);
-  message.setRangeText(before + selected + after, start, end, "select");
-  message.focus();
-  message.setSelectionRange(
-    start + before.length,
-    start + before.length + selected.length
-  );
-  updateCounter();
-}
-function openPanel(name) {
-  ["embed", "media", "markdown", "emoji"].forEach(key => {
-    $(key + "Panel").classList.toggle("open", key === name);
-  });
-  menu.classList.remove("open");
-  plusButton.setAttribute("aria-expanded", "false");
-}
-function applyLanguage() {
-  document.documentElement.lang = lang;
-  document.querySelectorAll("[data-i18n]").forEach(el => {
-    el.textContent = t(el.dataset.i18n);
-  });
-  message.placeholder = t("placeholder");
-  $("username").placeholder = t("usernamePlaceholder");
-  document.querySelectorAll("[data-action]").forEach(btn => {
-    btn.textContent = t(btn.dataset.action);
-  });
-}
-$("language").addEventListener("change", e => {
-  lang = e.target.value;
-  applyLanguage();
-});
-plusButton.addEventListener("click", () => {
-  menu.classList.toggle("open");
-  plusButton.setAttribute("aria-expanded", menu.classList.contains("open"));
-});
-document.querySelectorAll("[data-action]").forEach(btn => {
-  btn.addEventListener("click", () => openPanel(btn.dataset.action));
-});
-document.querySelectorAll("[data-md]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const spec = btn.dataset.md;
-    if (spec === "> ") wrapSelection("> ", "");
-    else if (spec === "||") wrapSelection("||", "||");
-    else {
-      const [before, after] = spec.split("|");
-      wrapSelection(before, after);
-    }
-  });
-});
-$("emojiChoices").addEventListener("click", e => {
-  const button = e.target.closest("button");
-  if (button) insertAtCursor(button.textContent);
-});
-message.addEventListener("input", updateCounter);
+$("language").onchange=e=>{lang=e.target.value;translate()};
+$("plusButton").onclick=()=>{const m=$("plusMenu");m.classList.toggle("open");$("plusButton").setAttribute("aria-expanded",m.classList.contains("open"))};
+document.querySelectorAll("[data-action]").forEach(b=>b.onclick=()=>panel(b.dataset.action));
+document.querySelectorAll("[data-md]").forEach(b=>b.onclick=()=>{const s=b.dataset.md;if(s==="> ")wrap("> ","");else if(s==="||")wrap("||","||");else{const [a,c]=s.split("|");wrap(a,c)}});
+$("emojiChoices").onclick=e=>{const b=e.target.closest("button");if(b)insert(b.textContent)};
+msg.addEventListener("input",update);
+$("files").onchange=()=>{$("fileList").textContent=[...$("files").files].map(f=>`${f.name} (${Math.ceil(f.size/1024)} KB)`).join(", ")};
 
-$("files").addEventListener("change", () => {
-  const files = [...$("files").files];
-  $("fileList").textContent = files.length
-    ? `${t("files")}: ${files.map(f =>
-        `${f.name} (${Math.ceil(f.size / 1024)} KB)`).join(", ")}`
-    : "";
-});
-
-$("messageForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const content = message.value.trim();
-  const title = $("embedTitle").value.trim();
-  const description = $("embedDescription").value.trim();
-  const selectedFiles = [...$("files").files];
-
-  if (!content && !title && !description && !selectedFiles.length) {
-    setStatus(t("empty"), "error");
-    return;
-  }
-
-  /*
-    The demo webhook URL is deliberately not used here.
-    Connect a backend endpoint through API_ENDPOINT when ready.
-  */
-  if (!API_ENDPOINT) {
-    setStatus(t("demo"));
-    return;
-  }
-
-  const button = $("sendButton");
-  button.disabled = true;
-  setStatus(t("sending"));
-
-  try {
-    const payload = {
-      content: content || undefined,
-      username: $("username").value.trim().slice(0, 80) || undefined,
-      allowed_mentions: { parse: [] }
-    };
-    if (title || description) {
-      payload.embeds = [{
-        title: title || undefined,
-        description: description || undefined,
-        color: parseInt($("embedColor").value.slice(1), 16)
-      }];
-    }
-
-    const form = new FormData();
-    form.append("payload_json", JSON.stringify(payload));
-    selectedFiles.forEach((file, index) => {
-      form.append(`files[${index}]`, file, file.name);
-    });
-
-    const response = await fetch(API_ENDPOINT, {
-      method: "POST",
-      body: form
-    });
-    if (!response.ok) throw new Error("send failed");
-
-    setStatus(t("success"), "success");
-    message.value = "";
-    $("embedTitle").value = "";
-    $("embedDescription").value = "";
-    $("files").value = "";
-    $("fileList").textContent = "";
-    updateCounter();
-  } catch {
-    setStatus(t("failure"), "error");
-  } finally {
-    button.disabled = false;
-  }
-});
-
-document.addEventListener("click", e => {
-  if (!e.target.closest(".menu-wrap")) {
-    menu.classList.remove("open");
-    plusButton.setAttribute("aria-expanded", "false");
-  }
-});
-applyLanguage();
-updateCounter();
+$("messageForm").onsubmit=async e=>{
+e.preventDefault();
+const content=msg.value.trim(),title=$("embedTitle").value.trim(),description=$("embedDescription").value.trim(),files=[...$("files").files];
+if(!content&&!title&&!description&&!files.length){status(t("empty"),"error");return}
+const button=$("sendButton");button.disabled=true;status(t("sending"));
+try{
+const payload={content:content||undefined,username:$("username").value.trim().slice(0,80)||undefined,allowed_mentions:{parse:[]}};
+if(title||description)payload.embeds=[{title:title||undefined,description:description||undefined,color:parseInt($("embedColor").value.slice(1),16)}];
+const form=new FormData();
+form.append("payload_json",JSON.stringify(payload));
+files.forEach((file,i)=>form.append(`files[${i}]`,file,file.name));
+const response=await fetch(WEBHOOK_URL,{method:"POST",body:form});
+if(!response.ok)throw new Error("send failed");
+status(t("success"),"success");
+msg.value="";$("embedTitle").value="";$("embedDescription").value="";$("files").value="";$("fileList").textContent="";update();
+}catch(error){status(t("failure"),"error")}
+finally{button.disabled=false}
+};
+document.addEventListener("click",e=>{if(!e.target.closest(".menu-wrap")){$("plusMenu").classList.remove("open");$("plusButton").setAttribute("aria-expanded","false")}});
+translate();update();
 </script>
 </body>
-  </html>
-  
+</html>
